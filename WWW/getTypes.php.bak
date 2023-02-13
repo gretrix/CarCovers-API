@@ -1,0 +1,63 @@
+<?php
+
+
+header("Access-Control-Allow-Origin: *");
+include 'conn.php';
+
+
+if ((isset($_GET['year'])) && (isset($_GET['make'])) && (isset($_GET['model']))) {
+	
+	$year = $_GET['year'];
+	$make = $_GET['make'];
+	$model = $_GET['model'];
+	
+	$query = "
+		SELECT carstype FROM cars 
+		
+		WHERE '" . $year . "' Between carsYearMin and carsYearMax  
+		AND LOWER(carsmake) = LOWER('" . $make . "')
+		AND LOWER(carsmodel) = LOWER('".$model."')
+		
+		ORDER BY carstype ASC";
+	$result = mysqli_query($conn, $query);
+
+	if (mysqli_num_rows($result) > 0) {
+	  while($row = mysqli_fetch_assoc($result)) {
+		$json[] = $row['carstype'];
+	  }
+	} else {
+	  $json[] = "none";
+	}
+	
+} else if (isset($_GET['model']) && (isset($_GET['make']))) {
+	$model = $_GET['model'];
+	$make = $_GET['make'];
+	
+	$query = "SELECT DISTINCT carstype FROM cars WHERE LOWER(carsmodel) = LOWER('" . $model . "') AND  LOWER(carsmake) = LOWER('" . $make . "') ORDER BY carstype ASC";
+	$result = mysqli_query($conn, $query);
+
+	if (mysqli_num_rows($result) > 0) {
+	  while($row = mysqli_fetch_assoc($result)) {
+		$json[] = $row['carsmodel'];
+	  }
+	} else {
+	  $json[] = "none";
+	}
+} 
+else {
+	$types = [
+		"ATV And UTV",
+		"Car",
+		"Golf Cart",
+		"Jet Ski",
+		"Motorcycle",
+		"Scooter",
+		"Snowmobile",
+		"SUV",
+		"Truck",
+		"Van"
+	];
+	
+
+}
+	echo json_encode($json);

@@ -1,0 +1,46 @@
+<?php 
+header("Access-Control-Allow-Origin: *");
+include 'conn.php';
+
+if (isset($_GET['type']) && isset($_GET['vendor']) && isset($_GET['width']) && isset($_GET['height'])) {
+	$type = $_GET['type'];
+	$vendor = $_GET['vendor'];
+	$height = explode(" – ", $_GET['height'])[0];
+	preg_match_all('!\d+!', $_GET['width'], $widths);
+	
+	$query = "SELECT * FROM covers WHERE LOWER(coverstype) = LOWER('" . $type . "') 
+			AND LOWER(coversname) LIKE LOWER('%" . $vendor . "%') ";
+	foreach ($widths[0] as $width) {
+		$query .= "AND coversname LIKE '%" . $width . "%' ";
+	}
+	if (str_contains($height, "Extra Tall")) {
+		$query .= "AND coversname LIKE '%Extra Tall%' ";
+	} else {
+		$query .= "AND coversname NOT LIKE '%Extra Tall%' ";
+	}
+	
+	$result = mysqli_query($conn, $query);
+
+	if (mysqli_num_rows($result) > 0) {
+	  while($row = mysqli_fetch_assoc($result)) {
+		$json[] = $row;
+	  }
+	} else {
+	  $json[] = "none";
+	}
+	echo json_encode($json);
+} else if (isset($_GET['type'])) {
+	$type = $_GET['type'];
+	
+	$query = "SELECT * FROM covers WHERE LOWER(coverstype) = LOWER('" . $type . "');";
+	$result = mysqli_query($conn, $query);
+
+	if (mysqli_num_rows($result) > 0) {
+	  while($row = mysqli_fetch_assoc($result)) {
+		$json[] = $row;
+	  }
+	} else {
+	  $json[] = "none";
+	}
+	echo json_encode($json);
+}

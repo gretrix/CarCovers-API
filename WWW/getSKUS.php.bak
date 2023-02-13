@@ -1,0 +1,41 @@
+<?php
+
+
+header("Access-Control-Allow-Origin: *");
+include 'conn.php';
+
+
+if ((isset($_GET['year'])) && (isset($_GET['make'])) && (isset($_GET['model'])) && (isset($_GET['sku'])) ) {
+	
+	$year = $_GET['year'];
+	$make = strtolower($_GET['make']);
+	$model = strtolower($_GET['model']);
+	$SKU = strtolower($_GET['sku']);
+
+	$query = "
+		SELECT * FROM skus
+		
+		WHERE year = '" . $year . "' 
+		and make LIKE '%".$make."%'
+		and model LIKE '%".$model."%'
+		and SKU LIKE '%".$SKU."%'
+		order by make;
+
+		
+		";
+	$result = mysqli_query($conn, $query);
+
+	if (mysqli_num_rows($result) > 0) {
+	  while($row = mysqli_fetch_assoc($result)) {
+		$json[] = $row['REAL_SKU'];
+	  }
+	} else {
+	  $json[] = "none";
+	}
+	
+} else{
+	$json[] = "test"
+}
+
+
+	echo json_encode($json);
